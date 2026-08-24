@@ -1,0 +1,8 @@
+Issue Type,Issue key,Summary,Status,Assignee,Issue Links
+Story,HA30-1001,Technical - Offline ID-to-Name Resolution,New / Open,Allwin. T,HA30-2001
+Story,HA30-1002,Create common utility,In Progress,Praveen Francis,HA30-2002; HA30-3001
+Story,HA30-1003,Activity Log - Mobile layout,New / Open,Samuel Ruthra Kumar,HA30-2003
+Task,HA30-2001,Implement resolution,Done,,HA30-1001
+Task,HA30-2002,Implement utility,Done,,HA30-1002
+Bug,HA30-3001,Activity Log defect,Open,,HA30-1002
+Task,HA30-2003,Mobile layout task,In Progress,,HA30-1003
