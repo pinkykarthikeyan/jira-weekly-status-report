@@ -100,11 +100,14 @@ def build_report(path,out,sprint='Sprint 100',week='Week of 17–21 Aug 2026'):
     else:
         highlights.append('Metrics are calculated directly from the exported tasks and bugs.')
 
-    next_focus = [
-        'Close the remaining task.' if tasks-done == 1 else f'Close the remaining {max(tasks-done, 0)} tasks.',
+    remaining_tasks = max(tasks - done, 0)
+    next_focus = []
+    if remaining_tasks:
+        next_focus.append('Close the remaining task.' if remaining_tasks == 1 else f'Close the remaining {remaining_tasks} tasks.')
+    next_focus.extend([
         f'Resolve and verify the {bugs} open bugs.' if bugs else 'Continue QA verification.',
         'Update Jira status after QA and validation.'
-    ]
+    ])
 
     attention = (
         ['Review new/open stories where associated tasks are already done.',
