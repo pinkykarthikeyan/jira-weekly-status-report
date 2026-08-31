@@ -11,6 +11,6 @@ def generate():
     out='/tmp/jira_weekly_report'; os.makedirs(out,exist_ok=True)
     csv_path=os.path.join(out,'input.csv'); pdf_path=os.path.join(out,'Sprint_Weekly_Status_Report.pdf')
     f.save(csv_path)
-    build_report(csv_path,pdf_path,(request.form.get('sprint') or 'Sprint 100').strip(),(request.form.get('week') or 'Week of 17–21 Aug 2026').strip())
+    build_report(csv_path,pdf_path,(request.form.get('sprint') or 'Sprint 101').strip(),(request.form.get('week') or 'Week of 17–21 Aug 2026').strip())
     return send_file(pdf_path,as_attachment=True,download_name='Sprint_Weekly_Status_Report.pdf')
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.environ.get('PORT',5000)),debug=False)

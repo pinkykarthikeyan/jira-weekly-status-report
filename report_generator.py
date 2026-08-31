@@ -39,7 +39,7 @@ def insight(title,bullets,icon,w):
     return Table(data,colWidths=[w],style=TableStyle([('BOX',(0,0),(-1,-1),.55,GRID),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),3*mm),('RIGHTPADDING',(0,0),(-1,-1),3*mm),('TOPPADDING',(0,0),(-1,0),1.3*mm),('BOTTOMPADDING',(0,0),(-1,0),1.3*mm),('TOPPADDING',(0,1),(-1,-1),.5*mm),('BOTTOMPADDING',(0,1),(-1,-1),.4*mm)]))
 def page_no(c,d):
     c.saveState();c.setFont('Helvetica',7.5);c.setFillColor(NAVY);c.drawRightString(W-MR,6.5*mm,f'Page {d.page} of 2');c.restoreState()
-def build_report(path,out,sprint='Sprint 100',week='Week of 17–21 Aug 2026'):
+def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026'):
     with open(path,encoding='utf-8-sig',newline='') as f: rows=list(csv.DictReader(f))
     if not rows: raise ValueError('CSV contains no data')
     hs=list(rows[0]); tc=col(hs,['Issue Type','Type']); kc=col(hs,['Issue key','Issue Key','Key','Ticket']); sc=col(hs,['Summary','Title','Description']); stc=col(hs,['Status','Issue Status']); oc=col(hs,['Assignee','Owner','Assigned To']); lc=col(hs,['Issue Links','Issue Link','Linked Issues','Links','Parent'])
