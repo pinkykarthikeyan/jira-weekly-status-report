@@ -122,7 +122,8 @@ def build_report(path,out,sprint='Sprint 100',week='Week of 17–21 Aug 2026'):
     boxes=Table([[insight('KEY HIGHLIGHTS',highlights,'◎',CW/3-2*mm),insight('NEXT FOCUS',next_focus,'↗',CW/3-2*mm),insight('MANAGEMENT ATTENTION',attention,'●',CW/3-2*mm)]],colWidths=[CW/3]*3,style=TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),1.2*mm),('RIGHTPADDING',(0,0),(-1,-1),1.2*mm)]))
     snapshot_title = f'▮  {sprint.upper()} – {snapshot_label} SNAPSHOT (ALL {total} {"STORIES" if stories else "ITEMS"})'
     S += [boxes,Spacer(1,3.5*mm),Paragraph(snapshot_title,sec),Spacer(1,1.2*mm)]
-    widths=[6*mm,72*mm,22*mm,24*mm,22*mm,22*mm,CW-168*mm]; data=[[p('#',7,8,WHITE,True,TA_CENTER),p('USER STORY / WORKSTREAM',7,8,WHITE,True,TA_CENTER),p('STATUS',7,8,WHITE,True,TA_CENTER),p('TASK STATUS',7,8,WHITE,True,TA_CENTER),p('BUG STATUS',7,8,WHITE,True,TA_CENTER),p('OWNER',7,8,WHITE,True,TA_CENTER),p('NOTES',7,8,WHITE,True,TA_CENTER)]]
+    status_width=22*mm; task_width=24*mm; bug_width=22*mm
+    widths=[6*mm,72*mm,status_width,task_width,bug_width,22*mm,CW-168*mm]; data=[[p('#',7,8,WHITE,True,TA_CENTER),p('USER STORY / WORKSTREAM',7,8,WHITE,True,TA_CENTER),p('STATUS',7,8,WHITE,True,TA_CENTER),p('TASK STATUS',7,8,WHITE,True,TA_CENTER),p('BUG STATUS',7,8,WHITE,True,TA_CENTER),p('OWNER',7,8,WHITE,True,TA_CENTER),p('NOTES',7,8,WHITE,True,TA_CENTER)]]
     for i,s in enumerate(report_items,1):
         if stories:
             ts=tm.get(s['key'],[]); bs=bm.get(s['key'],[]); td=sum(kind(x['status'])=='done' for x in ts); tp=sum(kind(x['status'])=='progress' for x in ts); ttxt='—' if not ts else (f'{td} / {len(ts)} Done' if not tp else f'{td} / {len(ts)} Done + {tp} In Progress'); bo=sum(kind(x['status'])!='done' for x in bs); btxt='—' if not bs else f'{bo} Open' if bo else '0 Open'; note=f'{bo} open bug'+('s' if bo!=1 else '') if bo else (f'{tp} task'+('s' if tp!=1 else '')+' in progress' if tp else ('No linked items' if not ts else 'All tasks done'))
@@ -130,7 +131,7 @@ def build_report(path,out,sprint='Sprint 100',week='Week of 17–21 Aug 2026'):
             ttxt = s['status'] if s['kind'] == 'task' else '—'
             btxt = s['status'] if s['kind'] == 'bug' else '—'
             note = 'Task' if s['kind'] == 'task' else 'Bug'
-        data.append([p(str(i),5.1,5.8,TEXT,True,TA_CENTER),p(f"{s['key']} – {s['summary']}",5.1,5.8),scell(s['status'],24*mm),scell(ttxt,28*mm),scell(btxt,27*mm),p(owner(s['owner']),5.1,5.8,TEXT,True),p(note,5.1,5.8)])
+        data.append([p(str(i),5.1,5.8,TEXT,True,TA_CENTER),p(f"{s['key']} – {s['summary']}",5.1,5.8),scell(s['status'],status_width),scell(ttxt,task_width),scell(btxt,bug_width),p(owner(s['owner']),5.1,5.8,TEXT,True),p(note,5.1,5.8)])
     tab=Table(data,colWidths=widths,repeatRows=1,style=TableStyle([('BACKGROUND',(0,0),(-1,0),NAVY),('GRID',(0,0),(-1,-1),.35,GRID),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),1.3*mm),('RIGHTPADDING',(0,0),(-1,-1),1.3*mm),('TOPPADDING',(0,1),(-1,-1),.65*mm),('BOTTOMPADDING',(0,1),(-1,-1),.65*mm)]))
     for r in range(2,len(data)+1):
         if r%2==0: tab.setStyle(TableStyle([('BACKGROUND',(0,r-1),(-1,r-1),colors.HexColor('#FAFBFC'))]))
