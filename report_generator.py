@@ -26,6 +26,13 @@ def p(txt,size=6.2,lead=7.3,color=TEXT,bold=False,align=TA_LEFT):
     return Paragraph(escape(norm(txt)).replace('\n','<br/>'),st)
 def owner(x):
     x=norm(x); return {'Samuel Ruthra Kumar':'Samuel Kishore Kumar','samuel ruthra kumar':'Samuel Kishore Kumar','Ajes Mini':'Alpa Mori','ajes mini':'Alpa Mori'}.get(x,x) or '—'
+def is_production_ticket(row,headers):
+    """Identify production tickets without requiring a fixed Jira column name."""
+    # Linked-issue columns can contain a production ticket key while describing
+    # a different work item, so classify from the ticket's own fields only.
+    own_fields=[h for h in headers if 'link' not in h.lower() and 'parent' not in h.lower()]
+    blob=' '.join(norm(row.get(h,'')) for h in own_fields)
+    return bool(re.search(r'\bproduction\b|\bprod(?:uction)?[- ]ticket\b',blob,re.I))
 def scell(text,w=28*mm):
     k=kind(text); bg,fg=(PALE_GREEN,GREEN) if k=='done' else ((colors.HexColor('#FFF3D6'),ORANGE) if k=='progress' else ((PALE_BLUE,BLUE) if k=='open' else (PALE_GRAY,TEXT)))
     return Table([[p(text,5.2,5.8,fg,True,TA_CENTER)]],colWidths=[w],rowHeights=[6.3*mm],style=TableStyle([('BACKGROUND',(0,0),(-1,-1),bg),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),1),('RIGHTPADDING',(0,0),(-1,-1),1),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),0)]))
@@ -38,7 +45,7 @@ def insight(title,bullets,icon,w):
     data=[[head]]+[[p('• '+b,7.1,9,TEXT)] for b in bullets]
     return Table(data,colWidths=[w],style=TableStyle([('BOX',(0,0),(-1,-1),.55,GRID),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),3*mm),('RIGHTPADDING',(0,0),(-1,-1),3*mm),('TOPPADDING',(0,0),(-1,0),1.3*mm),('BOTTOMPADDING',(0,0),(-1,0),1.3*mm),('TOPPADDING',(0,1),(-1,-1),.5*mm),('BOTTOMPADDING',(0,1),(-1,-1),.4*mm)]))
 def page_no(c,d):
-    c.saveState();c.setFont('Helvetica',7.5);c.setFillColor(NAVY);c.drawRightString(W-MR,6.5*mm,f'Page {d.page} of 2');c.restoreState()
+    c.saveState();c.setFont('Helvetica',7.5);c.setFillColor(NAVY);c.drawRightString(W-MR,6.5*mm,f'Page {d.page} of 3');c.restoreState()
 def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026'):
     with open(path,encoding='utf-8-sig',newline='') as f: rows=list(csv.DictReader(f))
     if not rows: raise ValueError('CSV contains no data')
@@ -49,6 +56,14 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026'):
         if not k: continue
         typ=norm(r.get(tc,'')).lower() if tc else ''
         issues[k]={'key':k,'summary':norm(r.get(sc,'')),'status':norm(r.get(stc,'')) or 'New / Open','owner':norm(r.get(oc,'')) if oc else '', 'kind':'bug' if 'bug' in typ else ('task' if 'task' in typ else 'story')}
+    production_tickets=[]
+    for r in rows:
+        k=norm(r.get(kc,'')) if kc else ''
+        if not k or not is_production_ticket(r,hs): continue
+        typ=norm(r.get(tc,'')) if tc else 'Ticket'
+        production_tickets.append({'key':k,'summary':norm(r.get(sc,'')),'status':norm(r.get(stc,'')) or 'New / Open','owner':norm(r.get(oc,'')) if oc else '', 'type':typ})
+    production_keys={x['key'] for x in production_tickets}
+    issues={k:x for k,x in issues.items() if k not in production_keys}
     stories=[x for x in issues.values() if x['kind']=='story']
     tm=defaultdict(list); bm=defaultdict(list)
     for x in issues.values():
@@ -147,4 +162,28 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026'):
             txt=f"{'Bug' if s['kind']=='bug' else 'Task'} — Current Status: {s['status']}"
             txt_color = TEXT
         dd.append([p(str(i),6,7,TEXT,True,TA_CENTER),p(f"{s['key']} – {s['summary']}",6,7,NAVY),p(txt,5.5,6.5,txt_color)])
-    dt=Table(dd,colWidths=dw,repeatRows=1,style=TableStyle([('BACKGROUND',(0,0),(-1,0),NAVY),('GRID',(0,0),(-1,-1),.3,GRID),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),1.4*mm),('RIGHTPADDING',(0,0),(-1,-1),1.4*mm),('TOPPADDING',(0,1),(-1,-1),1*mm),('BOTTOMPADDING',(0,1),(-1,-1),1*mm)]));S += [dt];doc.build(S)
+    dt=Table(dd,colWidths=dw,repeatRows=1,style=TableStyle([('BACKGROUND',(0,0),(-1,0),NAVY),('GRID',(0,0),(-1,-1),.3,GRID),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),1.4*mm),('RIGHTPADDING',(0,0),(-1,-1),1.4*mm),('TOPPADDING',(0,1),(-1,-1),1*mm),('BOTTOMPADDING',(0,1),(-1,-1),1*mm)]));S += [dt,PageBreak()]
+
+    production_total=len(production_tickets)
+    production_done=sum(kind(x['status'])=='done' for x in production_tickets)
+    production_progress=sum(kind(x['status'])=='progress' for x in production_tickets)
+    production_open=production_total-production_done
+    S += [Paragraph('PRODUCTION TICKET TRACKER',title),Spacer(1,1.2*mm),Paragraph(escape(f'{sprint}  |  {week}'),sub),Spacer(1,1.8*mm)]
+    pmw=CW/4
+    production_cards=Table([[metric(str(production_total),'PRODUCTION TICKETS',NAVY,pmw-3*mm),metric(str(production_progress),'IN PROGRESS',GREEN,pmw-3*mm),metric(str(production_done),'COMPLETED',BLUE,pmw-3*mm),metric(str(production_open),'OPEN / PENDING',RED,pmw-3*mm)]],colWidths=[pmw]*4,style=TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),1.5*mm),('RIGHTPADDING',(0,0),(-1,-1),1.5*mm)]))
+    S += [production_cards,Spacer(1,3*mm)]
+    production_message = ('No production tickets were identified in this Jira export.' if not production_tickets else f'{production_open} production ticket'+(' remains' if production_open==1 else 's remain')+' open or pending review.')
+    production_alert=Table([[p('!',16,18,WHITE,True,TA_CENTER),p(f'PRODUCTION STATUS: {"CLEAR" if not production_open else "AT RISK"}\n{production_message}',7.4,8.7,GREEN if not production_open else RED,True)]],colWidths=[15*mm,CW-15*mm],rowHeights=[15*mm],style=TableStyle([('BACKGROUND',(0,0),(0,0),GREEN if not production_open else RED),('BACKGROUND',(1,0),(1,0),PALE_GREEN if not production_open else PALE_RED),('BOX',(0,0),(-1,-1),.55,GREEN if not production_open else RED),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),2*mm),('RIGHTPADDING',(0,0),(-1,-1),2*mm)]))
+    S += [production_alert,Spacer(1,3.5*mm),Paragraph('▮  PRODUCTION TICKETS — CURRENT STATUS',sec),Spacer(1,1.2*mm)]
+    pw=[6*mm,29*mm,18*mm,25*mm,29*mm,CW-107*mm]
+    pd=[[p('#',7,8,WHITE,True,TA_CENTER),p('TICKET',7,8,WHITE,True,TA_CENTER),p('TYPE',7,8,WHITE,True,TA_CENTER),p('STATUS',7,8,WHITE,True,TA_CENTER),p('OWNER',7,8,WHITE,True,TA_CENTER),p('SUMMARY / NOTES',7,8,WHITE,True,TA_CENTER)]]
+    if production_tickets:
+        for i,x in enumerate(production_tickets,1):
+            pd.append([p(str(i),5.5,6.2,TEXT,True,TA_CENTER),p(x['key'],5.5,6.2,NAVY,True,TA_CENTER),p(x['type'],5.2,6),scell(x['status'],25*mm),p(owner(x['owner']),5.2,6,TEXT,True),p(x['summary'] or 'No summary provided',5.2,6.1)])
+    else:
+        pd.append([p('—',6,7,TEXT,True,TA_CENTER),p('No production tickets found',6,7,MUTED),p('—',6,7,MUTED),p('—',6,7,MUTED),p('—',6,7,MUTED),p('Add a production label, issue type, or summary marker in Jira to include a ticket here.',6,7,MUTED)])
+    pt=Table(pd,colWidths=pw,repeatRows=1,style=TableStyle([('BACKGROUND',(0,0),(-1,0),NAVY),('GRID',(0,0),(-1,-1),.35,GRID),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),1.3*mm),('RIGHTPADDING',(0,0),(-1,-1),1.3*mm),('TOPPADDING',(0,1),(-1,-1),1*mm),('BOTTOMPADDING',(0,1),(-1,-1),1*mm)]))
+    for r in range(2,len(pd)+1):
+        if r%2==0: pt.setStyle(TableStyle([('BACKGROUND',(0,r-1),(-1,r-1),colors.HexColor('#FAFBFC'))]))
+    S += [pt]
+    doc.build(S)

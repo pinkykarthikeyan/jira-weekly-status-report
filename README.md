@@ -1,6 +1,6 @@
 # Jira Weekly Status Report Generator
 
-The PDF layout is constrained to the printable A4 width. KPI cards are equal width, insight panels are equal width/height, and all table columns fit inside the page margins.
+The PDF layout is constrained to the printable A4 width. KPI cards are equal width, insight panels are equal width/height, and all table columns fit inside the page margins. The generated report contains a general delivery summary, detailed work-item status, and a dedicated production-ticket page.
 
 ## VS Code
 `py -3 -m venv .venv`
