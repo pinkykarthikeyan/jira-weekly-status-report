@@ -57,20 +57,21 @@ def generate():
         week=format_week_label(request.form.get('from_date'),request.form.get('to_date'))
     except ValueError as exc:
         return str(exc),400
-    selected_sprint=(request.form.get('sprint') or '').strip()
+    selected_sprints=[value.strip() for value in request.form.getlist('sprint') if value.strip()]
     filters={
-        'label':(request.form.get('label') or '').strip(),
-        'sprint':selected_sprint,
-        'status':(request.form.get('status') or '').strip(),
-        'workitem_type':(request.form.get('workitem_type') or '').strip(),
+        'label':request.form.getlist('label'),
+        'sprint':selected_sprints,
+        'status':request.form.getlist('status'),
+        'workitem_type':request.form.getlist('workitem_type'),
     }
+    report_sprint=selected_sprints[0] if len(selected_sprints)==1 else ('Selected Sprints' if selected_sprints else 'All Sprints')
     out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
     csv_path=os.path.join(out,'input.csv')
     backlog_pdf=os.path.join(out,'Product_Backlog_Report.pdf')
     production_pdf=os.path.join(out,'Production_Ticket_Report.pdf')
     zip_path=os.path.join(out,'Jira_Weekly_Status_Reports.zip')
     f.save(csv_path)
-    build_reports(csv_path,backlog_pdf,production_pdf,selected_sprint or 'All Sprints',week,filters=filters)
+    build_reports(csv_path,backlog_pdf,production_pdf,report_sprint,week,filters=filters)
     with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as archive:
         archive.write(backlog_pdf,arcname='Product_Backlog_Report.pdf')
         archive.write(production_pdf,arcname='Production_Ticket_Report.pdf')

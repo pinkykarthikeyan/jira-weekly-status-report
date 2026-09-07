@@ -65,19 +65,23 @@ def get_filter_options(path):
 
 def filter_rows(rows,headers,filters):
     filters=filters or {}
-    selected_label=norm(filters.get('label','')).lower()
-    selected_sprint=norm(filters.get('sprint','')).lower()
-    selected_status=norm(filters.get('status','')).lower()
-    selected_type=norm(filters.get('workitem_type','')).lower()
+    def selected_values(name):
+        value=filters.get(name,[])
+        if isinstance(value,str): value=[value]
+        return {norm(item).lower() for item in value if norm(item)}
+    selected_labels=selected_values('label')
+    selected_sprints=selected_values('sprint')
+    selected_statuses=selected_values('status')
+    selected_types=selected_values('workitem_type')
     sprint_col=col(headers,['Sprint'])
     status_col=col(headers,['Status','Issue Status'])
     type_col=col(headers,['Issue Type','Type'])
     filtered=[]
     for row in rows:
-        if selected_label and selected_label not in labels_for(row,headers): continue
-        if selected_sprint and selected_sprint not in {value.lower() for value in split_values(row.get(sprint_col,''))}: continue
-        if selected_status and norm(row.get(status_col,'')).lower() != selected_status: continue
-        if selected_type and norm(row.get(type_col,'')).lower() != selected_type: continue
+        if selected_labels and not selected_labels.intersection(labels_for(row,headers)): continue
+        if selected_sprints and not selected_sprints.intersection({value.lower() for value in split_values(row.get(sprint_col,''))}): continue
+        if selected_statuses and norm(row.get(status_col,'')).lower() not in selected_statuses: continue
+        if selected_types and norm(row.get(type_col,'')).lower() not in selected_types: continue
         filtered.append(row)
     return filtered
 
