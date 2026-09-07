@@ -1,5 +1,6 @@
 import csv,re
 from collections import defaultdict
+from datetime import date,datetime
 from xml.sax.saxutils import escape
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER,TA_LEFT
@@ -48,6 +49,15 @@ def col(headers,names):
 def split_values(value):
     return [norm(part) for part in re.split(r';',str(value or '')) if norm(part)]
 
+def parse_jira_date(value):
+    value=norm(value)
+    for pattern in ('%d/%b/%y %I:%M %p','%d/%b/%y','%Y-%m-%d %H:%M','%Y-%m-%d'):
+        try:
+            return datetime.strptime(value,pattern).date()
+        except ValueError:
+            pass
+    return None
+
 def get_filter_options(path):
     headers,rows=read_jira_csv(path)
     label_values=set()
@@ -73,15 +83,25 @@ def filter_rows(rows,headers,filters):
     selected_sprints=selected_values('sprint')
     selected_statuses=selected_values('status')
     selected_types=selected_values('workitem_type')
+    from_value=norm(filters.get('from_date',''))
+    to_value=norm(filters.get('to_date',''))
+    from_date=date.fromisoformat(from_value) if from_value else None
+    to_date=date.fromisoformat(to_value) if to_value else None
     sprint_col=col(headers,['Sprint'])
     status_col=col(headers,['Status','Issue Status'])
     type_col=col(headers,['Issue Type','Type'])
+    created_col=col(headers,['Created'])
+    updated_col=col(headers,['Updated'])
     filtered=[]
     for row in rows:
         if selected_labels and not selected_labels.intersection(labels_for(row,headers)): continue
         if selected_sprints and not selected_sprints.intersection({value.lower() for value in split_values(row.get(sprint_col,''))}): continue
         if selected_statuses and norm(row.get(status_col,'')).lower() not in selected_statuses: continue
         if selected_types and norm(row.get(type_col,'')).lower() not in selected_types: continue
+        if from_date or to_date:
+            row_dates=[parse_jira_date(row.get(column,'')) for column in (created_col,updated_col) if column]
+            row_dates=[value for value in row_dates if value]
+            if not any((not from_date or value >= from_date) and (not to_date or value <= to_date) for value in row_dates): continue
         filtered.append(row)
     return filtered
 

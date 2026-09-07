@@ -5,10 +5,14 @@ from flask import Flask, jsonify, render_template, request, send_file
 from report_generator import build_report, get_filter_options
 app=Flask(__name__)
 
-DEFAULT_FROM_DATE='2026-08-17'
-DEFAULT_TO_DATE='2026-08-21'
+DEFAULT_FROM_DATE=''
+DEFAULT_TO_DATE=''
 
 def format_week_label(from_value,to_value):
+    if not from_value and not to_value:
+        return 'All Dates'
+    if not from_value or not to_value:
+        raise ValueError('Please select both From and To dates, or leave both blank.')
     try:
         start=date.fromisoformat(from_value)
         end=date.fromisoformat(to_value)
@@ -62,6 +66,8 @@ def generate():
         'sprint':selected_sprints,
         'status':request.form.getlist('status'),
         'workitem_type':request.form.getlist('workitem_type'),
+        'from_date':request.form.get('from_date','').strip(),
+        'to_date':request.form.get('to_date','').strip(),
     }
     report_sprint=', '.join(selected_sprints)
     out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
