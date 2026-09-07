@@ -104,7 +104,7 @@ def metric(num,label,color,w):
     b=Table([[p(label,7.2,8.2,NAVY,True,TA_CENTER)]],colWidths=[w],rowHeights=[8*mm],style=TableStyle([('BACKGROUND',(0,0),(-1,-1),WHITE),('BOX',(0,0),(-1,-1),.55,color),('VALIGN',(0,0),(-1,-1),'MIDDLE')]))
     return Table([[a],[b]],colWidths=[w],rowHeights=[15*mm,9*mm],style=TableStyle([('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),0)]))
 def insight(title,bullets,icon,w):
-    head=Table([[p(icon,9,10,NAVY,True,TA_CENTER),p(title,8.7,9.7,NAVY,True)]],colWidths=[9*mm,w-9*mm],rowHeights=[8*mm],style=TableStyle([('BACKGROUND',(0,0),(-1,-1),PALE_GRAY),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0)]))
+    head=Table([[p(icon,9,10,NAVY,True,TA_CENTER),p(title,8.7,9.7,NAVY,True)]],colWidths=[9*mm,w-15*mm],rowHeights=[8*mm],style=TableStyle([('BACKGROUND',(0,0),(-1,-1),PALE_GRAY),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0)]))
     data=[[head]]+[[p('• '+b,7.1,9,TEXT)] for b in bullets]
     return Table(data,colWidths=[w],style=TableStyle([('BOX',(0,0),(-1,-1),.55,GRID),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),3*mm),('RIGHTPADDING',(0,0),(-1,-1),3*mm),('TOPPADDING',(0,0),(-1,0),1.3*mm),('BOTTOMPADDING',(0,0),(-1,0),1.3*mm),('TOPPADDING',(0,1),(-1,-1),.5*mm),('BOTTOMPADDING',(0,1),(-1,-1),.4*mm)]))
 def page_no(c,d):
@@ -197,7 +197,7 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',re
     title=ParagraphStyle('title',fontName='Helvetica-Bold',fontSize=18,leading=19,textColor=NAVY,alignment=TA_CENTER); sub=ParagraphStyle('sub',fontName='Helvetica-Bold',fontSize=9.2,leading=10.5,textColor=TEXT,alignment=TA_CENTER); sec=ParagraphStyle('sec',fontName='Helvetica-Bold',fontSize=9.2,leading=10.5,textColor=NAVY)
     doc=BaseDocTemplate(out,pagesize=A4,leftMargin=ML,rightMargin=MR,topMargin=MT,bottomMargin=MB)
     frame=Frame(ML,MB,CW,H-MT-MB,id='f',leftPadding=0,rightPadding=0,topPadding=0,bottomPadding=0);doc.addPageTemplates([PageTemplate(id='p',frames=[frame],onPage=page_no)])
-    report_title='FILTERED JIRA STATUS REPORT' if report_kind == 'filtered' else 'WEEKLY STATUS REPORT'
+    report_title='JIRA STATUS REPORT' if report_kind == 'filtered' else 'WEEKLY STATUS REPORT'
     S=[Paragraph(report_title,title),Spacer(1,1.2*mm),Paragraph(escape(f'{sprint}  |  {week}'),sub),Spacer(1,1.8*mm)]
     mw=CW/4
     cards=Table([[metric(str(total),'USER STORIES',NAVY,mw-3*mm),metric(str(ip),'IN PROGRESS',GREEN,mw-3*mm),metric(f'{done}/{tasks}','RELATED TASKS DONE',BLUE,mw-3*mm),metric(str(bugs),'OPEN RELATED BUGS',RED,mw-3*mm)]],colWidths=[mw]*4,style=TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),1.5*mm),('RIGHTPADDING',(0,0),(-1,-1),1.5*mm)]));S += [cards,Spacer(1,3*mm)]
@@ -241,7 +241,8 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',re
     )
 
     boxes=Table([[insight('KEY HIGHLIGHTS',highlights,'◎',CW/3-2*mm),insight('NEXT FOCUS',next_focus,'↗',CW/3-2*mm),insight('MANAGEMENT ATTENTION',attention,'●',CW/3-2*mm)]],colWidths=[CW/3]*3,style=TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),1.2*mm),('RIGHTPADDING',(0,0),(-1,-1),1.2*mm)]))
-    snapshot_title = f'▮  {sprint.upper()} – {snapshot_label} SNAPSHOT (ALL {total} {"STORIES" if stories else "ITEMS"})'
+    snapshot_scope=f'{sprint.upper()} – ' if norm(sprint) else ''
+    snapshot_title = f'▮  {snapshot_scope}{snapshot_label} SNAPSHOT (ALL {total} {"STORIES" if stories else "ITEMS"})'
     S += [boxes,Spacer(1,3.5*mm),Paragraph(snapshot_title,sec),Spacer(1,1.2*mm)]
     status_width=22*mm; task_width=24*mm; bug_width=22*mm
     widths=[6*mm,72*mm,status_width,task_width,bug_width,22*mm,CW-168*mm]; data=[[p('#',7,8,WHITE,True,TA_CENTER),p('USER STORY / WORKSTREAM',7,8,WHITE,True,TA_CENTER),p('STATUS',7,8,WHITE,True,TA_CENTER),p('TASK STATUS',7,8,WHITE,True,TA_CENTER),p('BUG STATUS',7,8,WHITE,True,TA_CENTER),p('OWNER',7,8,WHITE,True,TA_CENTER),p('NOTES',7,8,WHITE,True,TA_CENTER)]]

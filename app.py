@@ -63,11 +63,11 @@ def generate():
         'status':request.form.getlist('status'),
         'workitem_type':request.form.getlist('workitem_type'),
     }
-    report_sprint=selected_sprints[0] if len(selected_sprints)==1 else ('Selected Sprints' if selected_sprints else 'All Sprints')
+    report_sprint=', '.join(selected_sprints)
     out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
     csv_path=os.path.join(out,'input.csv')
-    report_pdf=os.path.join(out,'Filtered_Jira_Status_Report.pdf')
+    report_pdf=os.path.join(out,'Jira_Status_Report.pdf')
     f.save(csv_path)
     build_report(csv_path,report_pdf,report_sprint,week,report_kind='filtered',filters=filters)
-    return send_file(report_pdf,as_attachment=True,download_name='Filtered_Jira_Status_Report.pdf')
+    return send_file(report_pdf,as_attachment=True,download_name='Jira_Status_Report.pdf')
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.environ.get('PORT',5000)),debug=False)

@@ -1,6 +1,6 @@
 # Jira Weekly Status Report Generator
 
-The PDF layout is constrained to the printable A4 width. KPI cards are equal width, insight panels are equal width/height, and all table columns fit inside the page margins. The web form generates one filtered PDF containing only the Jira work items that match the selected filters. The generator still supports separate backlog and production reports programmatically.
+The PDF layout is constrained to the printable A4 width. KPI cards are equal width, insight panels are equal width/height, and all table columns fit inside the page margins. The web form generates one PDF containing only the Jira work items that match the selected filters. The generator still supports separate backlog and production reports programmatically.
 
 ## VS Code
 `py -3 -m venv .venv`
