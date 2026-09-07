@@ -162,7 +162,7 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',re
     if report_kind == 'production':
         build_production_pdf(out,production_tickets,sprint,week)
         return
-    production_keys={x['key'] for x in production_tickets}
+    production_keys={x['key'] for x in production_tickets} if report_kind != 'filtered' else set()
     issues={k:x for k,x in issues.items() if k not in production_keys}
     stories=[x for x in issues.values() if x['kind']=='story']
     tm=defaultdict(list); bm=defaultdict(list)
@@ -197,7 +197,8 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',re
     title=ParagraphStyle('title',fontName='Helvetica-Bold',fontSize=18,leading=19,textColor=NAVY,alignment=TA_CENTER); sub=ParagraphStyle('sub',fontName='Helvetica-Bold',fontSize=9.2,leading=10.5,textColor=TEXT,alignment=TA_CENTER); sec=ParagraphStyle('sec',fontName='Helvetica-Bold',fontSize=9.2,leading=10.5,textColor=NAVY)
     doc=BaseDocTemplate(out,pagesize=A4,leftMargin=ML,rightMargin=MR,topMargin=MT,bottomMargin=MB)
     frame=Frame(ML,MB,CW,H-MT-MB,id='f',leftPadding=0,rightPadding=0,topPadding=0,bottomPadding=0);doc.addPageTemplates([PageTemplate(id='p',frames=[frame],onPage=page_no)])
-    S=[Paragraph('WEEKLY STATUS REPORT',title),Spacer(1,1.2*mm),Paragraph(escape(f'{sprint}  |  {week}'),sub),Spacer(1,1.8*mm)]
+    report_title='FILTERED JIRA STATUS REPORT' if report_kind == 'filtered' else 'WEEKLY STATUS REPORT'
+    S=[Paragraph(report_title,title),Spacer(1,1.2*mm),Paragraph(escape(f'{sprint}  |  {week}'),sub),Spacer(1,1.8*mm)]
     mw=CW/4
     cards=Table([[metric(str(total),'USER STORIES',NAVY,mw-3*mm),metric(str(ip),'IN PROGRESS',GREEN,mw-3*mm),metric(f'{done}/{tasks}','RELATED TASKS DONE',BLUE,mw-3*mm),metric(str(bugs),'OPEN RELATED BUGS',RED,mw-3*mm)]],colWidths=[mw]*4,style=TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),1.5*mm),('RIGHTPADDING',(0,0),(-1,-1),1.5*mm)]));S += [cards,Spacer(1,3*mm)]
     item_word = 'user stories' if stories else 'work items'
@@ -205,7 +206,7 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',re
     bug_word = 'related bugs' if stories else 'bugs'
     alert_status = 'AT RISK' if total else 'NO GENERAL WORK ITEMS'
     alert_text = (f'{ip} of {total} {item_word} are in progress  |  {done}/{tasks} {task_word} done  |  {bugs} {bug_word} are open and require closure/verification.'
-                  if total else 'No non-production work items were identified in this Jira export. See the separate production ticket report.')
+                  if total else ('No work items matched the selected filters.' if report_kind == 'filtered' else 'No non-production work items were identified in this Jira export. See the separate production ticket report.'))
     alert_color = RED if total else BLUE
     alert_bg = PALE_RED if total else PALE_BLUE
     alert=Table([[p('!',16,18,WHITE,True,TA_CENTER),p(f'OVERALL STATUS: {alert_status}\n{alert_text}',7.4,8.7,alert_color,True)]],colWidths=[15*mm,CW-15*mm],rowHeights=[15*mm],style=TableStyle([('BACKGROUND',(0,0),(0,0),alert_color),('BACKGROUND',(1,0),(1,0),alert_bg),('BOX',(0,0),(-1,-1),.55,alert_color),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),2*mm),('RIGHTPADDING',(0,0),(-1,-1),2*mm)]));S += [alert,Spacer(1,3*mm)]
@@ -255,7 +256,7 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',re
     tab=Table(data,colWidths=widths,repeatRows=1,style=TableStyle([('BACKGROUND',(0,0),(-1,0),NAVY),('GRID',(0,0),(-1,-1),.35,GRID),('VALIGN',(0,0),(-1,-1),'MIDDLE'),('LEFTPADDING',(0,0),(-1,-1),1.3*mm),('RIGHTPADDING',(0,0),(-1,-1),1.3*mm),('TOPPADDING',(0,1),(-1,-1),.65*mm),('BOTTOMPADDING',(0,1),(-1,-1),.65*mm)]))
     for r in range(2,len(data)+1):
         if r%2==0: tab.setStyle(TableStyle([('BACKGROUND',(0,r-1),(-1,r-1),colors.HexColor('#FAFBFC'))]))
-    detailed_title = '▮  DETAILED DELIVERY STATUS (User Story → Tasks / Bugs)' if stories else '▮  DETAILED DELIVERY STATUS (All Exported Work Items)'
+    detailed_title = ('▮  DETAILED DELIVERY STATUS (Filtered Work Items)' if report_kind == 'filtered' else ('▮  DETAILED DELIVERY STATUS (User Story → Tasks / Bugs)' if stories else '▮  DETAILED DELIVERY STATUS (All Exported Work Items)'))
     S += [tab,PageBreak(),Paragraph(detailed_title,sec),Spacer(1,1.5*mm)]
     dw=[6*mm,68*mm,CW-74*mm]; dd=[[p('#',6.5,7,WHITE,True,TA_CENTER),p('USER STORY / WORKSTREAM',6.5,7,WHITE,True,TA_CENTER),p('LINKED TASKS / BUGS — CURRENT STATUS',6.5,7,WHITE,True,TA_CENTER)]]
     for i,s in enumerate(report_items,1):

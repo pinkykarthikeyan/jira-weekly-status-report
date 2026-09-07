@@ -1,9 +1,8 @@
 import os
 import tempfile
-import zipfile
 from datetime import date
 from flask import Flask, jsonify, render_template, request, send_file
-from report_generator import build_reports, get_filter_options
+from report_generator import build_report, get_filter_options
 app=Flask(__name__)
 
 DEFAULT_FROM_DATE='2026-08-17'
@@ -67,13 +66,8 @@ def generate():
     report_sprint=selected_sprints[0] if len(selected_sprints)==1 else ('Selected Sprints' if selected_sprints else 'All Sprints')
     out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
     csv_path=os.path.join(out,'input.csv')
-    backlog_pdf=os.path.join(out,'Product_Backlog_Report.pdf')
-    production_pdf=os.path.join(out,'Production_Ticket_Report.pdf')
-    zip_path=os.path.join(out,'Jira_Weekly_Status_Reports.zip')
+    report_pdf=os.path.join(out,'Filtered_Jira_Status_Report.pdf')
     f.save(csv_path)
-    build_reports(csv_path,backlog_pdf,production_pdf,report_sprint,week,filters=filters)
-    with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as archive:
-        archive.write(backlog_pdf,arcname='Product_Backlog_Report.pdf')
-        archive.write(production_pdf,arcname='Production_Ticket_Report.pdf')
-    return send_file(zip_path,as_attachment=True,download_name='Jira_Weekly_Status_Reports.zip')
+    build_report(csv_path,report_pdf,report_sprint,week,report_kind='filtered',filters=filters)
+    return send_file(report_pdf,as_attachment=True,download_name='Filtered_Jira_Status_Report.pdf')
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.environ.get('PORT',5000)),debug=False)
