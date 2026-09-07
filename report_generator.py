@@ -44,6 +44,43 @@ def col(headers,names):
     for h in headers:
         if any(n.lower() in h.lower() for n in names):return h
     return None
+
+def split_values(value):
+    return [norm(part) for part in re.split(r';',str(value or '')) if norm(part)]
+
+def get_filter_options(path):
+    headers,rows=read_jira_csv(path)
+    label_values=set()
+    for row in rows:
+        label_values.update(labels_for(row,headers))
+    sprint_col=col(headers,['Sprint'])
+    status_col=col(headers,['Status','Issue Status'])
+    type_col=col(headers,['Issue Type','Type'])
+    return {
+        'labels':sorted(label_values),
+        'sprints':sorted({value for row in rows for value in split_values(row.get(sprint_col,''))}) if sprint_col else [],
+        'statuses':sorted({norm(row.get(status_col,'')) for row in rows if norm(row.get(status_col,''))}) if status_col else [],
+        'workitem_types':sorted({norm(row.get(type_col,'')) for row in rows if norm(row.get(type_col,''))}) if type_col else [],
+    }
+
+def filter_rows(rows,headers,filters):
+    filters=filters or {}
+    selected_label=norm(filters.get('label','')).lower()
+    selected_sprint=norm(filters.get('sprint','')).lower()
+    selected_status=norm(filters.get('status','')).lower()
+    selected_type=norm(filters.get('workitem_type','')).lower()
+    sprint_col=col(headers,['Sprint'])
+    status_col=col(headers,['Status','Issue Status'])
+    type_col=col(headers,['Issue Type','Type'])
+    filtered=[]
+    for row in rows:
+        if selected_label and selected_label not in labels_for(row,headers): continue
+        if selected_sprint and selected_sprint not in {value.lower() for value in split_values(row.get(sprint_col,''))}: continue
+        if selected_status and norm(row.get(status_col,'')).lower() != selected_status: continue
+        if selected_type and norm(row.get(type_col,'')).lower() != selected_type: continue
+        filtered.append(row)
+    return filtered
+
 def kind(s):
     x=norm(s).lower()
     return 'done' if any(a in x for a in ('done','closed','resolved')) else ('progress' if 'progress' in x else ('open' if 'open' in x or 'new' in x else 'other'))
@@ -102,8 +139,9 @@ def build_production_pdf(out,production_tickets,sprint,week):
     S += [pt]
     doc.build(S)
 
-def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',report_kind='backlog'):
+def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',report_kind='backlog',filters=None):
     hs,rows=read_jira_csv(path)
+    rows=filter_rows(rows,hs,filters)
     tc=col(hs,['Issue Type','Type']); kc=col(hs,['Issue key','Issue Key','Key','Ticket']); sc=col(hs,['Summary','Title','Description']); stc=col(hs,['Status','Issue Status']); oc=col(hs,['Assignee','Owner','Assigned To']); lc=col(hs,['Issue Links','Issue Link','Linked Issues','Links','Parent'])
     issues={}
     for r in rows:
@@ -229,7 +267,7 @@ def build_report(path,out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',re
     S += [dt]
     doc.build(S)
 
-def build_reports(path,backlog_out,production_out,sprint='Sprint 101',week='Week of 17–21 Aug 2026'):
+def build_reports(path,backlog_out,production_out,sprint='Sprint 101',week='Week of 17–21 Aug 2026',filters=None):
     """Generate the two stakeholder reports from one Jira export."""
-    build_report(path,backlog_out,sprint,week,report_kind='backlog')
-    build_report(path,production_out,sprint,week,report_kind='production')
+    build_report(path,backlog_out,sprint,week,report_kind='backlog',filters=filters)
+    build_report(path,production_out,sprint,week,report_kind='production',filters=filters)

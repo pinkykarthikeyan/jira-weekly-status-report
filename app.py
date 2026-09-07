@@ -2,8 +2,8 @@ import os
 import tempfile
 import zipfile
 from datetime import date
-from flask import Flask, render_template, request, send_file
-from report_generator import build_reports
+from flask import Flask, jsonify, render_template, request, send_file
+from report_generator import build_reports, get_filter_options
 app=Flask(__name__)
 
 DEFAULT_FROM_DATE='2026-08-17'
@@ -28,6 +28,27 @@ def format_week_label(from_value,to_value):
 @app.get('/')
 def index():
     return render_template('index.html',default_from_date=DEFAULT_FROM_DATE,default_to_date=DEFAULT_TO_DATE)
+
+@app.post('/filter-options')
+def filter_options():
+    f=request.files.get('csv_file')
+    if not f or not f.filename.lower().endswith('.csv'):
+        return jsonify(error='Please upload a CSV file.'),400
+    temp_path=None
+    try:
+        with tempfile.NamedTemporaryFile(suffix='.csv',delete=False) as temp:
+            temp_path=temp.name
+        f.save(temp_path)
+        return jsonify(get_filter_options(temp_path))
+    except (OSError,ValueError) as exc:
+        return jsonify(error=str(exc)),400
+    finally:
+        if temp_path:
+            try:
+                os.unlink(temp_path)
+            except FileNotFoundError:
+                pass
+
 @app.post('/generate')
 def generate():
     f=request.files.get('csv_file')
@@ -36,13 +57,20 @@ def generate():
         week=format_week_label(request.form.get('from_date'),request.form.get('to_date'))
     except ValueError as exc:
         return str(exc),400
+    selected_sprint=(request.form.get('sprint') or '').strip()
+    filters={
+        'label':(request.form.get('label') or '').strip(),
+        'sprint':selected_sprint,
+        'status':(request.form.get('status') or '').strip(),
+        'workitem_type':(request.form.get('workitem_type') or '').strip(),
+    }
     out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
     csv_path=os.path.join(out,'input.csv')
     backlog_pdf=os.path.join(out,'Product_Backlog_Report.pdf')
     production_pdf=os.path.join(out,'Production_Ticket_Report.pdf')
     zip_path=os.path.join(out,'Jira_Weekly_Status_Reports.zip')
     f.save(csv_path)
-    build_reports(csv_path,backlog_pdf,production_pdf,(request.form.get('sprint') or 'Sprint 101').strip(),week)
+    build_reports(csv_path,backlog_pdf,production_pdf,selected_sprint or 'All Sprints',week,filters=filters)
     with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as archive:
         archive.write(backlog_pdf,arcname='Product_Backlog_Report.pdf')
         archive.write(production_pdf,arcname='Production_Ticket_Report.pdf')

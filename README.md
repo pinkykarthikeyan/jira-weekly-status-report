@@ -8,7 +8,7 @@ The PDF layout is constrained to the printable A4 width. KPI cards are equal wid
 `pip install -r requirements.txt`
 `python app.py`
 
-Open http://127.0.0.1:5000. Select the From and To dates in the date pickers. The download is a ZIP containing both PDFs.
+Open http://127.0.0.1:5000. Select the From and To dates, then choose any available label, sprint, status, or work item type from the CSV-driven dropdowns. The download is a ZIP containing both PDFs.
 
 ## Render
 Build: `pip install -r requirements.txt`
