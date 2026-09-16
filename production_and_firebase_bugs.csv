@@ -1,0 +1,13 @@
+Key,Summary,Issue Type,Category,Status,Assignee,Date,URL
+HA30-15365,"Prod Issue - ""Add Animals to Inventory"" Popup Is Not Displayed for New Tags in Counting Session(Tablet)",Bug,Production Bug,Done,gnana sankar,9/11/2026,https://herdx.atlassian.net/browse/HA30-15365
+HA30-15332,Herdview Snapview - Mismatches on Top Medicines Administered and medicine name is not displayed properly,Bug,Production Bug,Done,Raji S,9/9/2026,https://herdx.atlassian.net/browse/HA30-15332
+HA30-15321,Prod Issue - Health & Treatment – Added Medicine Not Displayed Against Animal ID but Used Dosage Is Reduced,Bug,Production Bug,Duplicate,Muhundhan E,9/9/2026,https://herdx.atlassian.net/browse/HA30-15321
+HA30-15319,Prod issue - Wrong Due date is calculating in Preg Check,Bug,Production Bug,Done,ajith,9/9/2026,https://herdx.atlassian.net/browse/HA30-15319
+HA30-15312,Prod - Treatment Linking Health info not working once we did manual sync only its updating,Bug,Production Bug,Done,Abraham,9/9/2026,https://herdx.atlassian.net/browse/HA30-15312
+HA30-15269,Activity Log Is Not Translated After Changing the Application Language,Bug,Production Bug,New / Open,gnana sankar,9/8/2026,https://herdx.atlassian.net/browse/HA30-15269
+HA30-15257,"Production: Activity log - Upload Excel, Under Treatment details should not be shown",Bug,Production Bug,HerdX Accepted,Raji S,9/7/2026,https://herdx.atlassian.net/browse/HA30-15257
+HA30-15249,Prod issue - Activity Log - Weight Unit Is Displayed as lbs Instead of kg,Bug,Production Bug,HerdX Accepted,ajith,9/7/2026,https://herdx.atlassian.net/browse/HA30-15249
+HA30-15248,Production - Activity Log Records Are Not Displayed Across All Devices,Bug,Production Bug,Done,Raji S,9/7/2026,https://herdx.atlassian.net/browse/HA30-15248
+HA30-15366,"Firebase Crash - While Selecting animal and try to move the animals, Crash is reporting in treminal",Bug,Firebase Crash,New / Open,samuel kishore kumar,9/11/2026,https://herdx.atlassian.net/browse/HA30-15366
+HA30-15323,Firebase Crash - _StringBase.substring FlutterError - RangeError (end): Invalid value: Not in inclusive range 0..2: 3,Bug,Firebase Crash,Ready for Testing,Abraham,9/9/2026,https://herdx.atlassian.net/browse/HA30-15323
+HA30-15322,Firebase Crash - Provider._inheritedElementOf io.flutter.plugins.firebase.crashlytics.FlutterError,Bug,Firebase Crash,Ready for Testing,samuel kishore kumar,9/9/2026,https://herdx.atlassian.net/browse/HA30-15322
