@@ -1,0 +1,79 @@
+Key,Summary,Issue Type,Status,Assignee,Date
+HA30-15376,Production Hot Fix Release 1.1.289 (489) for IOS Android and Web,Task,New / Open,Abraham,11-Sep-26
+HA30-15375,Feed Module Automation – Add Ingredient and Ration Feeding Flow on iOS & Android,Task,In Progress,Mariappan E,11-Sep-26
+HA30-15374,Run QA Automation Regression Suite on Staging build 5.0.153 (05),Task,In Progress,Mariappan E,11-Sep-26
+HA30-15373,Global Search – Deleted Multiple Animals Still Displayed Before Sync,Bug,Ready for Testing,Muhundhan E,11-Sep-26
+HA30-15372,Activity Log Displays Other-Location Animals in Add to Inventory Activity,Bug,Ready for Testing,Allwin. T,11-Sep-26
+HA30-15371,HerdView SnapView - Status Filter Death Displays an Error Message,Bug,Done,Raji S,11-Sep-26
+HA30-15369,Dev task - Implement Crashlytics Error Guard and Handling for Feed Module,Task,In Progress,samuel kishore kumar,11-Sep-26
+HA30-15368,Something Went Wrong Error Occurs When Deleting an Added Calf from Parentage,Bug,Ready for Testing,Allwin. T,11-Sep-26
+HA30-15367,Chute Session - Medicine Details Are Not Displayed Properly When Clicking the three-dot menu icon,Bug,New / Open,Alpa Mori,11-Sep-26
+HA30-15366,Firebase Crash - While Selecting animal and try to move the animals Crash is reporting in treminal,Bug,New / Open,samuel kishore kumar,11-Sep-26
+HA30-15365,Prod Issue - Add Animals to Inventory Popup Is Not Displayed for New Tags in Counting Session (Tablet),Bug,Done,gnana sankar,11-Sep-26
+HA30-15364,Activity Log - Only One Medicine Record Displayed When Two Medicines Are Added via Chute Session,Bug,Ready for Testing,Allwin. T,11-Sep-26
+HA30-15363,Production Hot Fix Release 1.1.288 (488) for IOS Android and Web,Task,Done,Abraham,11-Sep-26
+HA30-15362,Staging Release 5.0.153 (05) for IOS Android and Web,Task,Done,Abraham,11-Sep-26
+HA30-15358,Search Available UHF Tags by Additional ID,Story,New / Open,Unassigned,10-Sep-26
+HA30-15357,Group Treatment protocols and Processing protocols in settings & assignment,Story,New / Open,Unassigned,10-Sep-26
+HA30-15356,Run QA Automation Regression Suite on Staging build 5.0.153 (03),Task,Done,Mariappan E,10-Sep-26
+HA30-15355,Upload Excel: Error Displayed When UHF Primary ID Is Added as Additional ID for Visual Tag,Bug,New / Open,Alpa Mori,10-Sep-26
+HA30-15354,Upload Excel: Error Displayed When UHF Primary ID Is Added as Additional ID for LF Tag,Bug,New / Open,Alpa Mori,10-Sep-26
+HA30-15353,UHF Primary ID Cannot Be Added as Additional ID for an LF Tag,Bug,Ready for Testing,samuel kishore kumar,10-Sep-26
+HA30-15352,Activity Log Combines Tags from Separate HSR and LF Reader Sessions,Bug,Done,gnana sankar,10-Sep-26
+HA30-15351,Upload Excel: Error Message Displayed When LF Primary ID Is Added as Additional Visual ID,Bug,In Progress,Alpa Mori,10-Sep-26
+HA30-15350,Update Counting Session Regression Automation for R6 Reader Selection UI Changes,Task,Done,Mariappan E,10-Sep-26
+HA30-15349,Production Hot Fix Release 1.1.287 (487) for IOS Android and Web,Task,Done,Abraham,10-Sep-26
+HA30-15348,Breed Color markings Alignment Is Incorrect in Activity Log After Adding a New Animal,Bug,Done,gnana sankar,10-Sep-26
+HA30-15347,HerdView SnapView: Top Locations Count Mismatch for Total Active and Deceased Animals,Bug,Done,Raji S,10-Sep-26
+HA30-15346,Staging Release 5.0.153 (04) for IOS Android and Web,Task,Done,Abraham,10-Sep-26
+HA30-15345,Additional IDs: Error Message Displayed While Adding Additional IDs,Bug,Ready for Testing,Allwin. T,10-Sep-26
+HA30-15344,Beef Program Details Are Not Displayed in Activity Log After Adding an Animal,Bug,New / Open,Unassigned,10-Sep-26
+HA30-15343,Staging Release 5.0.153 (03) for IOS Android and Web,Task,Done,Abraham,10-Sep-26
+HA30-15341,Activity Log Dev Task - Undo Chute session animal weight update,Task,New / Open,Alpa Mori,10-Sep-26
+HA30-15339,Activity Log Dev Task - Undo Chute session animal movement,Task,New / Open,Alpa Mori,10-Sep-26
+HA30-15337,Activity Log Dev Task - Undo Chute session animal info edit,Task,New / Open,Alpa Mori,10-Sep-26
+HA30-15336,Activity Log Dev Task - Role based access,Task,New / Open,Alpa Mori,9-Sep-26
+HA30-15333,Tag Color Dev Task - Prefill tag color for HerdX tags,Task,Done,Alpa Mori,9-Sep-26
+HA30-15332,Herdview Snapview - Mismatches on Top Medicines Administered,Bug,Done,Raji S,9-Sep-26
+HA30-15331,Herdview Snapview - Mismatches on Time on Yard Distribution,Bug,Done,Raji S,9-Sep-26
+HA30-15330,HerdView SnapView - Mismatches on Animal Status by Sex/Type,Bug,Done,Raji S,9-Sep-26
+HA30-15329,Activity Log - Chute session - Add Edit & Delete Treatments,Task,Done,Allwin. T,9-Sep-26
+HA30-15328,HerdView SnapView QA Task,Task,In Progress,Raji S,9-Sep-26
+HA30-15327,HerdView SnapView – Top Location Is Not Displayed on Right Side,Bug,Done,Raji S,9-Sep-26
+HA30-15326,Run QA Automation Regression Suite on Staging build 5.0.153 (02),Task,Done,Mariappan E,9-Sep-26
+HA30-15324,Dev task - Implement Crashlytics Error Guard (Counting Sessions),Task,Done,samuel kishore kumar,9-Sep-26
+HA30-15320,Firebase Crash - View.of FlutterError,Task,Done,Alpa Mori,9-Sep-26
+HA30-15319,Prod issue - Wrong Due date is calculating in Preg Check,Bug,Done,ajith,9-Sep-26
+HA30-15313,Staging Release 5.0.153 (02) for IOS Android and Web,Task,Done,Abraham,9-Sep-26
+HA30-15312,Prod - Treatment Linking Health info not working,Bug,Done,Abraham,9-Sep-26
+HA30-15287,Run QA Automation Regression Suite on Production Hot Fix 1.1.286,Task,Done,Mariappan E,9-Sep-26
+HA30-15283,Activity Log - Chute session - Add/ Update Health details,Task,New / Open,Allwin. T,8-Sep-26
+HA30-15282,Activity Log - Front development for Chute session Treatments,Task,Done,Allwin. T,8-Sep-26
+HA30-15281,Activity Log - Front end dev for Animal Info - Single & Bulk Edit,Task,Done,Allwin. T,8-Sep-26
+HA30-15280,Activity Log - Animal Info - Bulk Edit,Task,Done,Allwin. T,8-Sep-26
+HA30-15279,Run QA Automation Regression Suite on Staging build 5.0.153 (01),Task,Done,Mariappan E,8-Sep-26
+HA30-15278,Activity Log - Animal Info single edit,Task,Done,Allwin. T,8-Sep-26
+HA30-15276,Production Hot Fix Release 1.1.286 (486) for IOS Android and Web,Task,Done,Abraham,8-Sep-26
+HA30-15275,Activity Log - Dev Add to Inventory (All Scan Methods),Task,Done,Allwin. T,8-Sep-26
+HA30-15274,Deleted Tags – Filter by Reason Options Cannot Be Selected,Bug,Done,Raji S,8-Sep-26
+HA30-15272,Dev task - Implement Crashlytics Error Guard for Transfers,Task,Done,samuel kishore kumar,8-Sep-26
+HA30-15271,Run QA Automation Regression Suite on Production build 1.1.285,Task,Done,Mariappan E,8-Sep-26
+HA30-15270,Animal Range Is Not Displayed in Quick Action,Bug,Done,gnana sankar,8-Sep-26
+HA30-15263,Stage Release 5.0.153 (01) for IOS Android and Web,Task,Done,Abraham,8-Sep-26
+HA30-15262,Deployment for Sprint 102,Story,New / Open,Abraham,8-Sep-26
+HA30-15260,Provide option to enable AI assistant in Burger Menu,Task,Done,samuel kishore kumar,8-Sep-26
+HA30-15259,Activity Log - Chute session - Add Edit & Delete Treatments,Story,New / Open,Allwin. T,7-Sep-26
+HA30-15258,Dev task - Implement Crashlytics Error Guard (Sync Methods),Task,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15256,Implement Crashlytics Error Guard (Health & Treatments),Story,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15255,Implement Crashlytics Error Guard (Feed Module),Story,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15254,Implement Crashlytics Error Guard (Animal Info Single/Bulk),Story,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15253,Implement Crashlytics Error Guard (Add Animals to Inventory),Story,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15252,Implement Crashlytics Error Guard (Counting Sessions),Story,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15251,Implement Crashlytics Error Guard (Transfers Module),Story,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15250,Implement Crashlytics Error Guard (Dashboard Sync & Settings),Story,New / Open,samuel kishore kumar,7-Sep-26
+HA30-15249,Prod issue - Activity Log - Weight Unit Displayed as lbs,Bug,HerdX Accepted,ajith,7-Sep-26
+HA30-15245,Activity Log - Add to Inventory (All Scan Methods),Story,New / Open,Allwin. T,7-Sep-26
+HA30-15239,Dev Task - Re-order Navigation Menu,Task,Done,Muhundhan E,7-Sep-26
+HA30-15238,Re-order Navigation Menu,Story,New / Open,Muhundhan E,7-Sep-26
+HA30-15232,Dev Task - Persistent Bottom Navigation bar,Task,Done,Muhundhan E,7-Sep-26
+HA30-15231,Dev Task - LF Readers alert message for Android 13 & below,Task,Done,Muhundhan E,7-Sep-26
