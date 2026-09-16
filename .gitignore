@@ -1,3 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
+tmp/
+output/
+outputs/
+node_modules/

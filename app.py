@@ -2,7 +2,8 @@ import os
 import tempfile
 from datetime import date
 from flask import Flask, jsonify, render_template, request, send_file
-from report_generator import build_report, get_filter_options
+from docx_report_generator import build_docx_report
+from report_generator import csv_sprint_label, csv_week_label, get_filter_options
 app=Flask(__name__)
 
 DEFAULT_FROM_DATE=''
@@ -10,7 +11,7 @@ DEFAULT_TO_DATE=''
 
 def format_week_label(from_value,to_value):
     if not from_value and not to_value:
-        return 'All Dates'
+        return 'Week not specified'
     if not from_value or not to_value:
         raise ValueError('Please select both From and To dates, or leave both blank.')
     try:
@@ -56,8 +57,10 @@ def filter_options():
 def generate():
     f=request.files.get('csv_file')
     if not f or not f.filename.lower().endswith('.csv'): return 'Please upload a CSV file.',400
+    from_value=request.form.get('from_date','').strip()
+    to_value=request.form.get('to_date','').strip()
     try:
-        week=format_week_label(request.form.get('from_date'),request.form.get('to_date'))
+        week=format_week_label(from_value,to_value) if from_value or to_value else None
     except ValueError as exc:
         return str(exc),400
     selected_sprints=[value.strip() for value in request.form.getlist('sprint') if value.strip()]
@@ -72,8 +75,10 @@ def generate():
     report_sprint=', '.join(selected_sprints)
     out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
     csv_path=os.path.join(out,'input.csv')
-    report_pdf=os.path.join(out,'Jira_Status_Report.pdf')
+    report_docx=os.path.join(out,'Jira_Status_Report.docx')
     f.save(csv_path)
-    build_report(csv_path,report_pdf,report_sprint,week,report_kind='filtered',filters=filters)
-    return send_file(report_pdf,as_attachment=True,download_name='Jira_Status_Report.pdf')
+    week=week or csv_week_label(csv_path)
+    report_sprint=report_sprint or csv_sprint_label(csv_path)
+    build_docx_report(csv_path,report_docx,report_sprint,week,filters=filters)
+    return send_file(report_docx,as_attachment=True,download_name='Jira_Status_Report.docx')
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.environ.get('PORT',5000)),debug=False)

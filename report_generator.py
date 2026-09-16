@@ -51,12 +51,35 @@ def split_values(value):
 
 def parse_jira_date(value):
     value=norm(value)
-    for pattern in ('%d/%b/%y %I:%M %p','%d/%b/%y','%Y-%m-%d %H:%M','%Y-%m-%d'):
+    for pattern in ('%d/%b/%y %I:%M %p','%d/%b/%y','%d-%b-%y','%d-%b-%Y','%Y-%m-%d %H:%M','%Y-%m-%d'):
         try:
             return datetime.strptime(value,pattern).date()
         except ValueError:
             pass
     return None
+
+def csv_week_label(path):
+    headers,rows=read_jira_csv(path)
+    date_col=col(headers,['Date','Created','Updated'])
+    dates=[parse_jira_date(row.get(date_col,'')) for row in rows] if date_col else []
+    dates=[value for value in dates if value]
+    if not dates:
+        return 'Week not specified'
+    start,end=min(dates),max(dates)
+    if start == end:
+        return f'Week of {start.day} {start.strftime("%B %Y")}'
+    if start.year == end.year and start.month == end.month:
+        return f'Week of {start.day}–{end.day} {end.strftime("%B %Y")}'
+    return f'Week of {start.day} {start.strftime("%B %Y")}–{end.day} {end.strftime("%B %Y")}'
+
+def csv_sprint_label(path):
+    headers,rows=read_jira_csv(path)
+    sprint_col=col(headers,['Sprint'])
+    values=[]
+    if sprint_col:
+        for row in rows:
+            values.extend(split_values(row.get(sprint_col,'')))
+    return ', '.join(dict.fromkeys(values))
 
 def get_filter_options(path):
     headers,rows=read_jira_csv(path)
