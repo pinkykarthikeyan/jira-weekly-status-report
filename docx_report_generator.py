@@ -393,9 +393,13 @@ def build_production_bug_report(path, out, sprint="", week="Week not specified",
     summary_column = col(headers, ["Summary", "Title", "Description"])
     status_column = col(headers, ["Status", "Issue Status"])
     owner_column = col(headers, ["Assignee", "Owner", "Assigned To"])
+    # Production/firebase bug exports are often pre-filtered in Jira and may not
+    # include an Issue Type column at all. Without this fallback every row would
+    # default to "Work Item" and get silently excluded below, producing an
+    # empty report even though the CSV has real data.
     items = []
     for row in raw_rows:
-        issue_type = norm(row.get(type_column, "")) if type_column else "Work Item"
+        issue_type = norm(row.get(type_column, "")) if type_column else "Bug"
         items.append({
             "key": norm(row.get(key_column, "")),
             "summary": norm(row.get(summary_column, "")),
@@ -404,7 +408,7 @@ def build_production_bug_report(path, out, sprint="", week="Week not specified",
             "status": norm(row.get(status_column, "")) or "New / Open",
             "owner": _display_owner(owner(row.get(owner_column, ""))) if owner_column else "Unassigned",
         })
-    bugs = [item for item in items if item["kind"] == "bug"]
+    bugs = [item for item in items if item["kind"] == "bug"] if type_column else items
     bug_status = _status_counts(bugs)
     unassigned = [item for item in bugs if not item["owner"] or item["owner"] == "Unassigned"]
 
