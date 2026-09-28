@@ -5,3 +5,4 @@ tmp/
 output/
 outputs/
 node_modules/
+.vs/
