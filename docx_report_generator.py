@@ -383,3 +383,79 @@ def build_docx_report(path, out, sprint="", week="Week not specified", filters=N
 
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     document.save(out)
+
+
+def build_production_bug_report(path, out, sprint="", week="Week not specified", filters=None):
+    headers, raw_rows = read_jira_csv(path)
+    raw_rows = filter_rows(raw_rows, headers, filters)
+    type_column = col(headers, ["Issue Type", "Type"])
+    key_column = col(headers, ["Issue key", "Issue Key", "Key", "Ticket"])
+    summary_column = col(headers, ["Summary", "Title", "Description"])
+    status_column = col(headers, ["Status", "Issue Status"])
+    owner_column = col(headers, ["Assignee", "Owner", "Assigned To"])
+    items = []
+    for row in raw_rows:
+        issue_type = norm(row.get(type_column, "")) if type_column else "Work Item"
+        items.append({
+            "key": norm(row.get(key_column, "")),
+            "summary": norm(row.get(summary_column, "")),
+            "type": issue_type,
+            "kind": issue_type.lower(),
+            "status": norm(row.get(status_column, "")) or "New / Open",
+            "owner": _display_owner(owner(row.get(owner_column, ""))) if owner_column else "Unassigned",
+        })
+    bugs = [item for item in items if item["kind"] == "bug"]
+    bug_status = _status_counts(bugs)
+    unassigned = [item for item in bugs if not item["owner"] or item["owner"] == "Unassigned"]
+
+    document = Document()
+    section = document.sections[0]
+    section.page_width = Inches(8.5)
+    section.page_height = Inches(11)
+    section.top_margin = Inches(0.625)
+    section.bottom_margin = Inches(0.625)
+    section.left_margin = Inches(0.625)
+    section.right_margin = Inches(0.625)
+    _add_page_chrome(section, sprint)
+    normal = document.styles["Normal"]
+    normal.font.name = "Arial"
+    normal.font.size = Pt(8.5)
+    normal.font.color.rgb = RGBColor.from_string(TEXT)
+
+    title = document.add_paragraph()
+    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = title.add_run("Production Bug Status Report")
+    run.bold = True
+    run.font.name = "Arial"
+    run.font.size = Pt(22)
+    run.font.color.rgb = RGBColor.from_string(NAVY)
+    title.paragraph_format.space_after = Pt(2)
+    subtitle = document.add_paragraph()
+    subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    subtitle_run = subtitle.add_run(f"{week}   |   Prepared for stakeholder distribution")
+    subtitle_run.italic = True
+    subtitle_run.font.name = "Arial"
+    subtitle_run.font.size = Pt(11)
+    subtitle_run.font.color.rgb = RGBColor.from_string(MUTED)
+    subtitle.paragraph_format.space_after = Pt(10)
+
+    _heading(document, f"Bugs Needing Attention ({len(bugs)})")
+    paragraph = document.add_paragraph("Sorted by status so items closest to closure remain visible alongside active risks.")
+    paragraph.paragraph_format.space_after = Pt(8)
+    for run in paragraph.runs:
+        run.font.name = "Arial"
+        run.font.size = Pt(10.5)
+        run.font.color.rgb = RGBColor.from_string(MUTED)
+    bug_order = {"Ready for Testing": 0, "New / Open": 1, "In Progress": 2, "HerdX Accepted": 3, "Done": 4}
+    bug_rows = [["Key", "Issue", "Owner", "Status"]]
+    for bug in sorted(bugs, key=lambda item: (bug_order.get(item["status"], 9), item["key"])):
+        bug_rows.append([bug["key"], bug["summary"], bug["owner"] or "Unassigned", bug["status"]])
+    _table(document, bug_rows, [1.0, 3.75, 1.35, 1.15], status_column=3)
+
+    _heading(document, "Next Focus")
+    _bullet(document, f"Close or validate the {bug_status['Ready for Testing']} Ready-for-Testing bugs before sprint end.")
+    _bullet(document, f"Triage and assign the {len(unassigned)} unassigned items.")
+    _bullet(document, "Progress remaining task work and confirm milestones.")
+
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    document.save(out)

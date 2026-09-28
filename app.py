@@ -2,7 +2,7 @@ import os
 import tempfile
 from datetime import date
 from flask import Flask, jsonify, render_template, request, send_file
-from docx_report_generator import build_docx_report
+from docx_report_generator import build_docx_report, build_production_bug_report
 from report_generator import csv_sprint_label, csv_week_label, get_filter_options
 app=Flask(__name__)
 
@@ -73,12 +73,17 @@ def generate():
         'to_date':request.form.get('to_date','').strip(),
     }
     report_sprint=', '.join(selected_sprints)
+    report_type=request.form.get('report_type','wsr').strip().lower()
     out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
     csv_path=os.path.join(out,'input.csv')
-    report_docx=os.path.join(out,'Jira_Status_Report.docx')
     f.save(csv_path)
     week=week or csv_week_label(csv_path)
     report_sprint=report_sprint or csv_sprint_label(csv_path)
+    if report_type=='production':
+        report_docx=os.path.join(out,'Production_Bug_Status_Report.docx')
+        build_production_bug_report(csv_path,report_docx,report_sprint,week,filters=filters)
+        return send_file(report_docx,as_attachment=True,download_name='Production_Bug_Status_Report.docx')
+    report_docx=os.path.join(out,'Jira_Status_Report.docx')
     build_docx_report(csv_path,report_docx,report_sprint,week,filters=filters)
     return send_file(report_docx,as_attachment=True,download_name='Jira_Status_Report.docx')
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.environ.get('PORT',5000)),debug=False)
