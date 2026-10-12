@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block title %}Resource-wise Report{% endblock %}
+{% block body %}<main><section><h1>RESOURCE-WISE SPRINT REPORT</h1><p>Workload, status and work-type mix for every team member, with a detailed item list per resource.</p>
+<form action="{{ url_for('generate_resource') }}" method="post" enctype="multipart/form-data">{% with show_sprint=true %}{% include '_filters.html' %}{% endwith %}<button>Generate &amp; Download Resource Report</button></form></section></main>{% endblock %}

@@ -1,0 +1,6 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{% block title %}Jira Status Reports{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='pages.css') }}"></head>
+<body class="app"><header class="topbar"><a class="brand" href="{{ url_for('dashboard') }}">Jira Status Reports</a>
+<nav>{% for key,label,endpoint in [('dashboard','Dashboard','dashboard'),('wsr','Weekly Status','wsr_page'),('resource','Resource-wise','resource_page'),('backlog','Product Backlog','backlog_page')] %}<a href="{{ url_for(endpoint) }}"{% if page==key %} class="active" aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav></header>
+{% block body %}{% endblock %}
+<script src="{{ url_for('static', filename='filters.js') }}"></script>{% block scripts %}{% endblock %}</body></html>

@@ -13,3 +13,9 @@ Open http://127.0.0.1:5000. Select the From and To dates, then choose any availa
 ## Render
 Build: `pip install -r requirements.txt`
 Start: `gunicorn app:app`
+
+## Pages
+- `/` Dashboard – KPIs, status mix, workload per resource and the oldest backlog items. Loads the newest bundled `Sprint_*_All_Work_Items.csv` or any CSV you choose; the chosen CSV is remembered for the browser tab and pre-attached on the report pages.
+- `/wsr` Weekly Status Report and Production Bug Status Report (Word).
+- `/resource` Resource-wise Sprint Report (Word) – workload table, work-type mix and a detailed item list per person.
+- `/backlog` Product Backlog Report (Word) – items still in New / Open, by type and owner, with age.

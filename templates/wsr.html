@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block title %}Weekly Status Report{% endblock %}
+{% block body %}<main><section><h1>WEEKLY STATUS REPORT</h1><p>Upload a Jira CSV, choose your filters, and download the Weekly Status Report or the Production Bug Status Report.</p>
+<form action="{{ url_for('generate') }}" method="post" enctype="multipart/form-data"><div class="grid one"><div><label for="report_type">Report type</label><select id="report_type" name="report_type"><option value="wsr">Weekly Status Report</option><option value="production">Production Bug Status Report</option></select></div></div>
+{% with show_sprint=true %}{% include '_filters.html' %}{% endwith %}<button>Generate &amp; Download Report</button></form></section></main>{% endblock %}

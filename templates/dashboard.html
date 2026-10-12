@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}Sprint Dashboard{% endblock %}
+{% block body %}<main class="wide"><div class="dash">
+<div class="dash-head"><div><h1 id="dash_title">Sprint Dashboard</h1><p id="dash_sub">Loading work items…</p></div>
+<label class="filebtn">Load another CSV<input id="csv_file" type="file" accept=".csv" hidden></label></div>
+<p id="dash_error" class="dash-error" role="alert" hidden></p>
+<div id="dash_body" hidden>
+<div class="kpis" id="kpis"></div>
+<div class="panels">
+<section class="panel"><h2>Status mix</h2><div class="stack big" id="status_bar"></div><ul class="legend" id="status_legend"></ul><h2 class="sp">Work item types</h2><div id="type_bars"></div></section>
+<section class="panel"><h2>Workload by resource</h2><div id="resource_bars" class="resbars"></div></section>
+</div>
+<section class="panel"><h2>Product backlog <span class="muted" id="backlog_meta"></span></h2><div class="table-wrap"><table class="items"><thead><tr><th>Key</th><th>Summary</th><th>Type</th><th>Owner</th><th>Age</th></tr></thead><tbody id="backlog_rows"></tbody></table></div></section>
+<h2 class="sp">Reports</h2>
+<div class="cards"><a class="card" href="{{ url_for('wsr_page') }}"><b>Weekly Status Report</b><span>Stories, tasks, bugs and risks for stakeholders.</span></a><a class="card" href="{{ url_for('resource_page') }}"><b>Resource-wise Report</b><span>Per-person workload and item lists.</span></a><a class="card" href="{{ url_for('backlog_page') }}"><b>Product Backlog Report</b><span>Not-yet-started work by type, owner and age.</span></a></div>
+</div></div></main>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='dashboard.js') }}"></script>{% endblock %}

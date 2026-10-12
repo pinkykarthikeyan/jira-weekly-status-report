@@ -1,4 +1,4 @@
-import csv,re
+import csv,io,re
 from collections import defaultdict
 from datetime import date,datetime
 from xml.sax.saxutils import escape
@@ -16,7 +16,9 @@ PRODUCTION_LABELS={'prod','firebase'}
 
 def read_jira_csv(path):
     with open(path,encoding='utf-8-sig',newline='') as f:
-        reader=csv.reader(f)
+        # Jira exports can backslash-escape quotes (\") instead of doubling them,
+        # which shifts every later column in that row; normalise before parsing.
+        reader=csv.reader(io.StringIO(f.read().replace('\\"','""'),newline=''))
         headers=next(reader,[])
         rows=[]
         for values in reader:
@@ -51,6 +53,8 @@ def split_values(value):
 
 def parse_jira_date(value):
     value=norm(value)
+    iso=re.match(r'(\d{4}-\d{2}-\d{2})T',value)
+    if iso: value=iso.group(1)
     for pattern in ('%d/%b/%y %I:%M %p','%d/%b/%y','%d-%b-%y','%d-%b-%Y','%Y-%m-%d %H:%M','%Y-%m-%d'):
         try:
             return datetime.strptime(value,pattern).date()

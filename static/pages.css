@@ -1,0 +1,43 @@
+:root{--navy:#123a78;--ink:#14213d;--muted:#5c6675;--line:#d5dce5;--done:#0a963f;--test:#1767c5;--prog:#e0a100;--open:#8fa3bd;--drop:#c9d2dd}
+body.app{display:block}
+.topbar{display:flex;align-items:center;gap:24px;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--line);padding:0 24px}
+.brand{font-weight:800;color:var(--navy);text-decoration:none;padding:16px 0}
+.topbar nav{display:flex;gap:4px;flex-wrap:wrap}
+.topbar nav a{color:var(--muted);text-decoration:none;font-weight:700;font-size:14px;padding:18px 12px 15px;border-bottom:3px solid transparent}
+.topbar nav a:hover{color:var(--navy)}
+.topbar nav a.active{color:var(--navy);border-bottom-color:var(--navy)}
+body.app main{min-height:calc(100vh - 56px)}
+main.wide{align-items:flex-start}
+.grid.one{grid-template-columns:1fr}
+.dash{width:min(1180px,100%)}
+.dash-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.dash h1{text-align:left;margin:0}.dash-head p{text-align:left;margin:4px 0 0}
+.filebtn{display:inline-flex;align-items:center;height:40px;padding:0 16px;border:1px solid var(--navy);border-radius:6px;color:var(--navy);font-weight:700;font-size:14px;cursor:pointer;margin:0;background:#fff}
+.filebtn:hover{background:#eaf2fd}
+.dash-error{color:#b3141b;background:#fff0f1;border:1px solid #f3b9bd;border-radius:6px;padding:10px 14px;text-align:left}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kpi b{display:block;font-size:30px;color:var(--ink);line-height:1.1}.kpi span{font-size:13px;color:var(--muted)}
+.kpi.good b{color:var(--done)}.kpi.bad b{color:#c4161d}.kpi.warn b{color:#b36b00}
+.panels{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;margin-bottom:16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin-bottom:0;width:auto;box-shadow:none}
+.panels+.panel{margin-bottom:8px}
+.panel h2,.dash h2{font-size:15px;color:var(--navy);margin:0 0 12px}.dash h2.sp,.panel h2.sp{margin-top:24px}
+.muted{font-weight:400;color:var(--muted);font-size:12px}
+.stack{display:flex;height:22px;border-radius:4px;overflow:hidden;background:#eef2f6}.stack.big{height:34px}
+.seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;min-width:2px;text-shadow:0 0 2px rgba(0,0,0,.25)}
+.legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 0;padding:0;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.hbar{display:grid;grid-template-columns:130px 1fr 74px;align-items:center;gap:10px;margin-bottom:7px;font-size:12.5px}
+.hbar .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hbar .num{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.hbar .track{height:20px;background:#eef2f6;border-radius:4px;overflow:hidden}.hbar .track.stack{background:transparent}.hbar .fill{height:100%;background:var(--navy);border-radius:4px}
+.table-wrap{overflow-x:auto}
+.items{width:100%;border-collapse:collapse;font-size:13px}
+.items th{text-align:left;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line);padding:6px 8px}
+.items td{padding:7px 8px;border-bottom:1px solid #eef2f6;vertical-align:top}.items td.bad{color:#c4161d;font-weight:700}
+.items a{color:var(--test);text-decoration:none;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card{display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 18px;text-decoration:none;color:var(--ink)}
+.card:hover{border-color:var(--navy);box-shadow:0 4px 14px rgba(20,33,61,.08)}
+.card b{display:block;color:var(--navy);margin-bottom:4px}.card span{font-size:13px;color:var(--muted)}
+@media(max-width:860px){.panels{grid-template-columns:1fr}.hbar{grid-template-columns:100px 1fr 64px}}
