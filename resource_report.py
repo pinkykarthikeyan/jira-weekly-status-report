@@ -2,17 +2,22 @@
 import os
 from collections import Counter
 from datetime import date
+from io import BytesIO
 
 from docx import Document
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
 import docx_report_generator as g
+from pie_chart import pie_png
 from report_data import BUCKETS, backlog_items, by_resource, completion, load_items
 
 STATUS_ORDER = {'Ready for Testing': 0, 'Ready for Retest': 0, 'In Progress': 1, 'New / Open': 2, 'HerdX Accepted': 3, 'Done': 4}
+BUCKET_COLORS = {'Done': '0A963F', 'Testing': '1767C5', 'In Progress': 'E0A100', 'Open': '8FA3BD', 'Dropped': 'C9D2DD'}
+COMPLETED_TYPES = [('User Stories', {'story', 'user story'}), ('Tasks', {'task', 'sub-task', 'subtask'}), ('Bugs', {'bug'})]
 
 
 def _new_document(title, sprint, week):
@@ -74,6 +79,61 @@ def _table(document, rows, widths, **kw):
     return table
 
 
+def _completed_by_resource(document, groups, items):
+    rows = [['Resource'] + [label for label, _ in COMPLETED_TYPES] + ['Total Done']]
+    totals = Counter()
+    for name, group in groups.items():
+        done = [i for i in group if i['bucket'] == 'Done']
+        counts = [sum(i['type'].lower() in types for i in done) for _, types in COMPLETED_TYPES]
+        totals.update(dict(enumerate(counts + [len(done)])))
+        rows.append([name] + [n or '–' for n in counts] + [str(len(done))])
+    rows.append(['Total'] + [totals[k] for k in range(len(COMPLETED_TYPES) + 1)])
+    first = 2.25
+    _table(document, rows, [first] + [(g.CONTENT_WIDTH_IN - first) / 4] * 4, body_size=7.8)
+
+
+def _completion_pie(document, items):
+    counts = Counter(i['bucket'] for i in items)
+    buckets = [b for b in BUCKETS if counts[b]]
+    if not buckets:
+        return
+    layout = document.add_table(rows=1, cols=2)
+    layout.autofit = False
+    g._set_table_width(layout)
+    chart_cell, legend_cell = layout.rows[0].cells
+    for cell, width in ((chart_cell, 2.75), (legend_cell, g.CONTENT_WIDTH_IN - 2.75)):
+        cell.width = Inches(width)
+    for column, width in zip(layout.columns, (2.75, g.CONTENT_WIDTH_IN - 2.75)):
+        column.width = Inches(width)
+    picture = chart_cell.paragraphs[0]
+    picture.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    picture.add_run().add_picture(BytesIO(pie_png([counts[b] for b in buckets], [BUCKET_COLORS[b] for b in buckets])), width=Inches(2.4))
+    legend_cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    rows = [['Status', 'Items', 'Share']] + [[b, counts[b], f'{round(100 * counts[b] / len(items))}%'] for b in buckets]
+    legend = legend_cell.add_table(rows=len(rows), cols=3)
+    legend.autofit = False
+    g._borders(legend)
+    widths = [2.1, 0.9, 0.9]
+    g._set_table_width(legend, sum(widths))
+    for r, row in enumerate(rows):
+        for c, value in enumerate(row):
+            cell = legend.cell(r, c)
+            cell.width = Inches(widths[c])
+            if r == 0:
+                g._set_cell(cell, value, bold=True, color='FFFFFF', size=7.5, align=WD_ALIGN_PARAGRAPH.CENTER, fill=g.NAVY)
+            elif c == 0:
+                g._set_cell(cell, value, size=8.5, runs=[('■  ', True, BUCKET_COLORS[value]), (value, False, g.TEXT)])
+            else:
+                g._set_cell(cell, value, size=8.5, align=WD_ALIGN_PARAGRAPH.CENTER)
+    for column, width in zip(legend.columns, widths):
+        column.width = Inches(width)
+    note = legend_cell.add_paragraph()
+    note.paragraph_format.space_before = Pt(6)
+    run = note.add_run(f'{completion(items)}% complete — {counts["Done"]} of {len(items) - counts["Dropped"]} active items done (Dropped excluded).')
+    run.bold, run.font.name, run.font.size = True, 'Arial', Pt(9)
+    run.font.color.rgb = RGBColor.from_string(g.GREEN)
+
+
 def _sorted(items):
     return sorted(items, key=lambda i: (STATUS_ORDER.get(i['status'], 9), i['key']))
 
@@ -104,6 +164,13 @@ def build_resource_report(path, out, sprint='', week='Week not specified', filte
     rows.append(['Total', len(items)] + [totals[b] for b in BUCKETS] + [f'{completion(items)}%'])
     widths = [1.9, 0.7, 0.7, 0.75, 0.9, 0.7, 0.8, 0.8]
     _table(document, rows, widths, body_size=7.8)
+
+    g._heading(document, 'Completed by Resource')
+    _note(document, 'User stories, tasks and bugs in Done or HerdX Accepted. Total Done also counts other work item types.')
+    _completed_by_resource(document, groups, items)
+
+    g._heading(document, 'Completion Breakdown')
+    _completion_pie(document, items)
 
     types = [t for t, _ in Counter(i['type'] for i in items).most_common()]
     g._heading(document, 'Work Type Mix by Resource')
