@@ -16,6 +16,6 @@ Start: `gunicorn app:app`
 
 ## Pages
 - `/` Dashboard – KPIs, status mix, workload per resource and the oldest backlog items. Loads the newest bundled `Sprint_*_All_Work_Items.csv` or any CSV you choose; the chosen CSV is remembered for the browser tab and pre-attached on the report pages.
-- `/wsr` Weekly Status Report and Production Bug Status Report (Word).
+- `/wsr` Weekly Status Report (Word) – sprint snapshot, then QA and Dev resource details (per-person item table sorted by status), plus the Production Bug Status Report.
 - `/resource` Resource-wise Sprint Report (Word) – workload table, user stories / tasks / bugs completed per person, a completion pie chart, work-type mix and a detailed item list per person.
 - `/backlog` Product Backlog Report (Word) – items still in New / Open, by type and owner, with age.

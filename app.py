@@ -2,10 +2,11 @@ import os
 import tempfile
 from datetime import date
 from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, abort
-from docx_report_generator import build_docx_report, build_production_bug_report
+from docx_report_generator import build_production_bug_report
 from report_generator import csv_sprint_label, csv_week_label, get_filter_options
 from report_data import latest_sample, load_items, sprint_from_filename, summary
 from resource_report import build_backlog_report, build_resource_report
+from wsr_report import build_wsr_report
 app=Flask(__name__)
 BASE_DIR=os.path.dirname(os.path.abspath(__file__))
 
@@ -25,12 +26,8 @@ def format_week_label(from_value,to_value):
     if end < start:
         raise ValueError('The To date must be on or after the From date.')
     if start == end:
-        return f'Week of {start.day} {start.strftime("%b")} {start.year}'
-    if start.year == end.year and start.month == end.month:
-        return f'Week of {start.day}–{end.day} {end.strftime("%b")} {end.year}'
-    if start.year == end.year:
-        return f'Week of {start.day} {start.strftime("%b")}–{end.day} {end.strftime("%b")} {end.year}'
-    return f'Week of {start.day} {start.strftime("%b")} {start.year}–{end.day} {end.strftime("%b")} {end.year}'
+        return f'Week of {start.day} {start:%B %Y}'
+    return f'Week of {start.day} {start:%B %Y}-{end.day} {end:%B %Y}'
 
 def _upload_csv(name='csv_file'):
     f=request.files.get(name)
@@ -159,7 +156,8 @@ def generate():
         report_docx=os.path.join(out,'Production_Bug_Status_Report.docx')
         build_production_bug_report(csv_path,report_docx,report_sprint,week,filters=filters)
         return send_file(report_docx,as_attachment=True,download_name='Production_Bug_Status_Report.docx')
-    report_docx=os.path.join(out,'Jira_Status_Report.docx')
-    build_docx_report(csv_path,report_docx,report_sprint,week,filters=filters)
-    return send_file(report_docx,as_attachment=True,download_name='Jira_Status_Report.docx')
+    report_docx=os.path.join(out,'Weekly_Status_Report.docx')
+    build_wsr_report(csv_path,report_docx,report_sprint,week,filters=filters)
+    download_name=f"{report_sprint.replace(' ','_')}_WSR.docx" if report_sprint else 'Weekly_Status_Report.docx'
+    return send_file(report_docx,as_attachment=True,download_name=download_name)
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.environ.get('PORT',5000)),debug=False)
