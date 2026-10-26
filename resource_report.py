@@ -201,41 +201,39 @@ def build_resource_report(path, out, sprint='', week='Week not specified', filte
 
 def build_backlog_report(path, out, sprint='', week='Week not specified', filters=None):
     items = load_items(path, filters)
-    backlog = backlog_items(items)
+    backlog = [i for i in backlog_items(items) if i['type'].lower() == 'bug']
     today = date.today()
     ages = [(today - i['created']).days for i in backlog if i['created']]
     document = _new_document('Product Backlog Report', sprint, week)
 
     g._heading(document, 'Backlog Snapshot')
-    count = lambda t: sum(1 for i in backlog if i['type'].lower() == t)
-    _snapshot(document, [(len(backlog), 'Backlog Items', g.TEXT), (count('story'), 'Stories', g.BLUE),
-                         (count('bug'), 'Bugs', g.RED), (sum(i['owner'] == 'Unassigned' for i in backlog), 'Unassigned', g.AMBER),
-                         (f"{max(ages, default=0)}d", 'Oldest Item', g.MUTED)])
-    _note(document, f'Backlog = work items not yet started (status New / Open). {len(backlog)} of {len(items)} items in this export qualify.')
+    _snapshot(document, [(len(backlog), 'Backlog Bugs', g.RED),
+                         (sum(i['priority'].lower() in ('high', 'highest', 'critical', 'blocker') for i in backlog), 'High Priority', g.AMBER),
+                         (sum(i['owner'] == 'Unassigned' for i in backlog), 'Unassigned', g.BLUE),
+                         (f"{max(ages, default=0)}d", 'Oldest Bug', g.MUTED)])
+    _note(document, f'Backlog = bugs not yet started (status New / Open). Other work item types are excluded. {len(backlog)} of {len(items)} items in this export qualify.')
 
-    g._heading(document, 'Backlog by Type')
-    rows = [['Type', 'Items', 'Unassigned', 'Oldest (days)']]
-    for t, n in Counter(i['type'] for i in backlog).most_common():
-        group = [i for i in backlog if i['type'] == t]
+    g._heading(document, 'Backlog by Priority')
+    rows = [['Priority', 'Bugs', 'Unassigned', 'Oldest (days)']]
+    for t, n in Counter(i['priority'] for i in backlog).most_common():
+        group = [i for i in backlog if i['priority'] == t]
         rows.append([t, n, sum(i['owner'] == 'Unassigned' for i in group), max(((today - i['created']).days for i in group if i['created']), default=0)])
     _table(document, rows, [2.65, 1.5, 1.5, 1.6], body_size=8)
 
     g._heading(document, 'Backlog by Owner')
-    rows = [['Owner', 'Backlog Items']]
+    rows = [['Owner', 'Backlog Bugs']]
     for name, group in by_resource(backlog).items():
         rows.append([name, len(group)])
     _table(document, rows, [4.6, 2.65], body_size=8)
 
-    for t, _ in Counter(i['type'] for i in backlog).most_common():
-        group = sorted((i for i in backlog if i['type'] == t), key=lambda i: i['created'] or today)
-        g._heading(document, f'{t} Backlog ({len(group)})')
-        rows = [['Key', 'Summary', 'Owner', 'Priority', 'Created']]
-        for i in group:
-            rows.append([i['key'], i['summary'], i['owner'], i['priority'], i['created'].strftime('%d %b %Y') if i['created'] else '—'])
-        _table(document, rows, [0.95, 3.4, 1.2, 0.7, 1.0], body_size=7.4)
+    g._heading(document, f'Bug Backlog ({len(backlog)})')
+    rows = [['Key', 'Summary', 'Owner', 'Priority', 'Created']]
+    for i in sorted(backlog, key=lambda i: i['created'] or today):
+        rows.append([i['key'], i['summary'], i['owner'], i['priority'], i['created'].strftime('%d %b %Y') if i['created'] else '—'])
+    _table(document, rows, [0.95, 3.4, 1.2, 0.7, 1.0], body_size=7.4)
 
     g._heading(document, 'Next Focus')
     unassigned = sum(i['owner'] == 'Unassigned' for i in backlog)
-    g._bullet(document, f'Assign owners to the {unassigned} unassigned backlog items.' if unassigned else 'All backlog items have an owner.')
-    g._bullet(document, f"Review the {sum(1 for a in ages if a > 14)} items older than 14 days for priority or closure.")
+    g._bullet(document, f'Assign owners to the {unassigned} unassigned backlog bugs.' if unassigned else 'All backlog bugs have an owner.')
+    g._bullet(document, f"Review the {sum(1 for a in ages if a > 14)} bugs older than 14 days for priority or closure.")
     _save(document, out)
