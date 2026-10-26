@@ -72,9 +72,7 @@ def csv_week_label(path):
     start,end=min(dates),max(dates)
     if start == end:
         return f'Week of {start.day} {start.strftime("%B %Y")}'
-    if start.year == end.year and start.month == end.month:
-        return f'Week of {start.day}–{end.day} {end.strftime("%B %Y")}'
-    return f'Week of {start.day} {start.strftime("%B %Y")}–{end.day} {end.strftime("%B %Y")}'
+    return f'Week of {start.day} {start.strftime("%B %Y")}-{end.day} {end.strftime("%B %Y")}'
 
 def csv_sprint_label(path):
     headers,rows=read_jira_csv(path)

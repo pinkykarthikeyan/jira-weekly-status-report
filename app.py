@@ -1,6 +1,7 @@
 import os
 import tempfile
 from datetime import date
+from io import BytesIO
 from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, abort
 from docx_report_generator import build_production_bug_report
 from report_generator import csv_sprint_label, csv_week_label, get_filter_options
@@ -32,8 +33,8 @@ def format_week_label(from_value,to_value):
 def _upload_csv(name='csv_file'):
     f=request.files.get(name)
     if not f or not f.filename.lower().endswith('.csv'): return None,None
-    out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
-    path=os.path.join(out,f'input_{os.getpid()}_{abs(hash(f.filename))}.csv')
+    fd,path=tempfile.mkstemp(suffix='.csv')
+    os.close(fd)
     f.save(path)
     return path,f.filename
 
@@ -84,19 +85,23 @@ def api_summary():
 def _generate_new_report(builder,download_name):
     path,filename=_upload_csv()
     if not path: return 'Please upload a CSV file.',400
+    fd,out=tempfile.mkstemp(suffix='.docx')
+    os.close(fd)
     try:
         from_value=request.form.get('from_date','').strip(); to_value=request.form.get('to_date','').strip()
-        try:
-            week=format_week_label(from_value,to_value) if from_value or to_value else csv_week_label(path)
-        except ValueError as exc:
-            return str(exc),400
+        week=format_week_label(from_value,to_value) if from_value or to_value else csv_week_label(path)
         sprint=', '.join(v.strip() for v in request.form.getlist('sprint') if v.strip()) or csv_sprint_label(path) or sprint_from_filename(filename)
-        out=os.path.join(tempfile.gettempdir(),'jira_weekly_report',f'{os.getpid()}_{download_name}')
         builder(path,out,sprint,week,filters=_form_filters())
-        return send_file(out,as_attachment=True,download_name=download_name)
+        with open(out,'rb') as f: data=BytesIO(f.read())
+    except (OSError,ValueError) as exc:
+        return str(exc),400
     finally:
-        try: os.unlink(path)
-        except OSError: pass
+        for p in (path,out):
+            try: os.unlink(p)
+            except OSError: pass
+    if callable(download_name): download_name=download_name(sprint)
+    return send_file(data,as_attachment=True,download_name=download_name,
+                     mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
 
 @app.post('/generate/resource')
 def generate_resource():
@@ -128,36 +133,8 @@ def filter_options():
 
 @app.post('/generate')
 def generate():
-    f=request.files.get('csv_file')
-    if not f or not f.filename.lower().endswith('.csv'): return 'Please upload a CSV file.',400
-    from_value=request.form.get('from_date','').strip()
-    to_value=request.form.get('to_date','').strip()
-    try:
-        week=format_week_label(from_value,to_value) if from_value or to_value else None
-    except ValueError as exc:
-        return str(exc),400
-    selected_sprints=[value.strip() for value in request.form.getlist('sprint') if value.strip()]
-    filters={
-        'label':request.form.getlist('label'),
-        'sprint':selected_sprints,
-        'status':request.form.getlist('status'),
-        'workitem_type':request.form.getlist('workitem_type'),
-        'from_date':request.form.get('from_date','').strip(),
-        'to_date':request.form.get('to_date','').strip(),
-    }
-    report_sprint=', '.join(selected_sprints)
-    report_type=request.form.get('report_type','wsr').strip().lower()
-    out=os.path.join(tempfile.gettempdir(),'jira_weekly_report'); os.makedirs(out,exist_ok=True)
-    csv_path=os.path.join(out,'input.csv')
-    f.save(csv_path)
-    week=week or csv_week_label(csv_path)
-    report_sprint=report_sprint or csv_sprint_label(csv_path) or sprint_from_filename(f.filename)
-    if report_type=='production':
-        report_docx=os.path.join(out,'Production_Bug_Status_Report.docx')
-        build_production_bug_report(csv_path,report_docx,report_sprint,week,filters=filters)
-        return send_file(report_docx,as_attachment=True,download_name='Production_Bug_Status_Report.docx')
-    report_docx=os.path.join(out,'Weekly_Status_Report.docx')
-    build_wsr_report(csv_path,report_docx,report_sprint,week,filters=filters)
-    download_name=f"{report_sprint.replace(' ','_')}_WSR.docx" if report_sprint else 'Weekly_Status_Report.docx'
-    return send_file(report_docx,as_attachment=True,download_name=download_name)
+    if request.form.get('report_type','wsr').strip().lower()=='production':
+        return _generate_new_report(build_production_bug_report,'Production_Bug_Status_Report.docx')
+    return _generate_new_report(build_wsr_report,lambda sprint:f"{sprint.replace(' ','_').replace(',','')}_WSR.docx" if sprint else 'Weekly_Status_Report.docx')
+
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.environ.get('PORT',5000)),debug=False)
